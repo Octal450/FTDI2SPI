@@ -207,7 +207,7 @@ extern "C"
 				//if ((block_flash % 64) == 0 && (block_flash != 0)) {
 				//	PRINT_BLOCKS;
 				//}
-
+				
 				addr_raw += block_size;
 			}
 
@@ -242,6 +242,10 @@ extern "C"
 
 		closeDevice();
 		return -10; // NO MODE
+	}
+
+	__declspec(dllexport) int BadBlockLoc() {
+		return Sfc.LastBadBlockPos;
 	}
 	__declspec(dllexport) int spiGetBlocks() {
 		if (start_spi) {

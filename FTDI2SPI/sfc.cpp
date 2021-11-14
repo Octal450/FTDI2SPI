@@ -145,6 +145,10 @@ unsigned int SFC_init( uint32_t Config)
     Sfc.SouthBridgeRevision = (Config >> 17) & 0x03;
     //Sfc.BadBlockCount = GetBadBlockCount(Sfc.NandSizeDataPartitionBytes);
     Sfc.Initialized = TRUE;
-
+    
     return OK;
+}
+
+unsigned int badblockcount(uint32_t i) {
+    return i;
 }
