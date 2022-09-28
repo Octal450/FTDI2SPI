@@ -16,5 +16,6 @@ void AddWriteOutBuffer( DWORD dwNumControlBitsToWrite, unsigned char pWriteContr
 void AddReadOutBuffer( DWORD dwNumDataBitsToRead );
 void GetDataFromDevice(unsigned int dwNumDataBitsToRead, unsigned char ReadDataBuffer[] );
 void closeDevice();
+HRESULT CyclePort();
 
 #endif

@@ -24,6 +24,9 @@ const BYTE CLK_DATA_BITS_IN_ON_NEG_CLK_LSB_FIRST_CMD = '\x2F';
 typedef WORD ReadDataWordBuffer[MAX_READ_DATA_WORDS_BUFFER_SIZE];
 typedef ReadDataWordBuffer *PReadDataWordBuffer;
 
+FT_HANDLE FT_Handle = 0;
+FT_STATUS FT_Status = 0;
+
 FTC_HANDLE ftHandle = 0;  
 FTC_STATUS Status = FTC_SUCCESS;
 
@@ -534,4 +537,44 @@ void closeDevice() {
         SPI_Close(ftHandle);
         ftHandle = 0;
     }
+}
+
+HRESULT CyclePort() {
+    HRESULT Result = E_FAIL;
+    FT_HANDLE handle = 0;
+    FT_STATUS ftStatus = FT_INVALID_HANDLE;
+    DWORD devIndex = 0; // first device
+    char SerialBuffer[64];
+
+    ftStatus = FT_ListDevices((PVOID)devIndex, SerialBuffer, FT_LIST_BY_INDEX | FT_OPEN_BY_SERIAL_NUMBER);
+    if (ftStatus == FT_OK) {
+
+        //std::string text = SerialBuffer;
+        //// We Add Null Terminator so we dont overflow the string.
+        //text + "\0";
+        //wchar_t wtext[20];
+        //mbstowcs(wtext, text.c_str(), text.length());//includes null
+        //LPWSTR SerialNumber = wtext;
+
+        ftStatus = FT_OpenEx(SerialBuffer, FT_OPEN_BY_SERIAL_NUMBER, &FT_Handle);
+        //if (ftStatus == FT_OK) ftStatus = FT_ResetDevice(FT_Handle);
+        if (ftStatus == FT_OK) ftStatus = FT_CyclePort(FT_Handle);
+        else return Result;
+
+        //Print the Serial Number We dont have one so it will always open with it.
+        //MessageBox(nullptr, SerialNumber, L"FTCSPI DLL Message", MB_OK);
+    }
+    else return Result;
+
+    //This works test without cloing the connection so we can see if the speed increases and we can cleanup & flush  
+    ftStatus = FT_Close(FT_Handle);
+    if (ftStatus != FT_OK) {
+        int a = ftStatus;
+        wchar_t buffer[256];
+        wsprintfW(buffer, L"FTCSPI Failed with -> %d", a);
+        MessageBox(nullptr, buffer, L"FTCSPI DLL Message", MB_OK);
+        return Result;
+    }
+
+    return ERROR_SUCCESS;
 }

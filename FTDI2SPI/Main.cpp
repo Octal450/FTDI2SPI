@@ -240,6 +240,8 @@ extern "C"
 			free(flash_xbox);
 
 			closeDevice();
+			CyclePort();
+
 			return 0;
 		}
 
