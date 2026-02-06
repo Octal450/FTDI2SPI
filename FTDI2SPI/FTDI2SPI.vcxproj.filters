@@ -36,6 +36,12 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XeMMC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ISD2100.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wrapper_spi.h">
@@ -60,6 +66,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sfc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XeMMC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ISD2100.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

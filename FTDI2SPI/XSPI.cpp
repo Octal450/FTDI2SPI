@@ -4,6 +4,7 @@
 
 #include "XSPI.h"
 #include "wrapper_spi.h"
+#include <stdio.h>
 
 #define GPIO_DIR_XBOX		0x03
 #define GPIO_EJ_XBOX		0x02
@@ -108,6 +109,50 @@ unsigned int XSPIReadWORD_(unsigned char reg)
 	return res[0] | ((unsigned int)res[1]<<8);
 }
 
+unsigned int XSPIReadDWORD_(unsigned char reg)
+{
+	unsigned char res[4] = { 0, 0, 0, 0 };
+	unsigned char writeBuf[2] = { (reg << 2) | 1, 0xFF };
+
+	ClearOutputBuffer();
+
+	EnableSPIChip();
+	AddWriteOutBuffer(sizeof(writeBuf) * 8, writeBuf);
+	AddReadOutBuffer(4 * 8);
+	DisableSPIChip();
+
+	SetAnswerFast();
+	SendBytesToDevice();
+	GetDataFromDevice(4, res);
+
+	return  ((unsigned int)res[0]) |
+		(((unsigned int)res[1]) << 8) |
+		(((unsigned int)res[2]) << 16) |
+		(((unsigned int)res[3]) << 24);
+}
+void XSPIReadBlock_(unsigned char reg, unsigned char* buf, int num_words) {
+	// For 512-byte block: reg = 0x20, bytes = 512
+
+	unsigned char writeBuf[2] = { (reg << 2) | 1, 0xFF };
+
+	ClearOutputBuffer();
+	
+	// Batch 128 reads of the register (for 512 bytes)
+	for (int i = 0; i < num_words; ++i) {
+		EnableSPIChip();
+		AddWriteOutBuffer(sizeof(writeBuf) * 8, writeBuf);
+		AddReadOutBuffer(4 * 8); // Queue a read of 4 bytes
+		DisableSPIChip();
+	}
+
+	SetAnswerFast();
+	// Send the entire batch over USB
+	SendBytesToDevice();
+
+	// Get all 512 bytes back at once
+	GetDataFromDevice(num_words * 4, buf);
+}
+
 unsigned char XSPIReadBYTE_(unsigned char reg)
 {
 	unsigned char res;
@@ -164,6 +209,29 @@ void XSPIWriteWORD_(unsigned char reg, unsigned int Data)
 	DisableSPIChip();
 
 	SendBytesToDevice();
+}
+
+void XSPIQueueBytes_(unsigned char reg, unsigned int Data) {
+	unsigned char writeBuf[5] = { (reg << 2) | 2, 0,0,0,0 };
+	memcpy(&writeBuf[1], &Data, 4);
+	EnableSPIChip();
+	AddWriteOutBuffer(sizeof(writeBuf) * 8, writeBuf);
+	DisableSPIChip();
+
+}
+
+void XSPIWriteBlock_(unsigned char reg, unsigned char* data) {
+	// Now send the data block (512 bytes)
+	ClearOutputBuffer();
+	for (int i = 0; i < 0x200; i += 4) {
+		EnableSPIChip();
+	
+		AddWriteOutBuffer(0x20, &data[i]);  // Send 4 bytes at a time, 32 bits
+		DisableSPIChip();
+	}
+	SetAnswerFast();
+	SendBytesToDevice();
+
 }
 
 void XSPIWrite0_(unsigned char reg)

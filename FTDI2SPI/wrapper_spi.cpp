@@ -3,8 +3,9 @@
 
 #include "FTCSPI.h"
 #include "FTD2XX.H"
+#include <stdio.h>
 
-#define MAX_NUM_BYTES_USB_WRITE 4096
+#define MAX_NUM_BYTES_USB_WRITE 16384
 
 #define MAX_READ_DATA_WORDS_BUFFER_SIZE 65536    // 64k bytes
 #define MAX_FREQ_CLOCK_DIVISOR			0
@@ -51,9 +52,7 @@ bool spi_init( void )
   BYTE timerValue = 0;
   DWORD dwClockFrequencyHz = 0;
   bool bPerformCommandSequence = false;
-//  FTH_LOW_HIGH_PINS HighPinsInputData;
   DWORD dwNumDataBytesToWrite = 0;
-  //FTC_CLOSE_FINAL_STATE_PINS CloseFinalStatePinsData;
   DWORD dwDataWordInitValue = 0;
   DWORD dwDataWordValue = 0;
   DWORD dwWriteDataWordAddress = 0;
@@ -61,12 +60,9 @@ bool spi_init( void )
   DWORD dwControlLocAddress2 = 0;
   DWORD dwReadDataWordAddress = 0;
   WORD dwReadWordValue = 0;
-  //ReadDataWordBuffer ReadWordData;
   DWORD dwDataWordWritten = 0;
   DWORD dwCharCntr = 0;
-//ReadDataByteBuffer ReadDataBuffer;
   DWORD dwReadDataIndex = 0;
-//ReadCmdSequenceDataByteBuffer ReadCmdSequenceDataBuffer;
   int MsgBoxKeyPressed = 0;
   DWORD dwLoopCntr = 0;
 
@@ -80,7 +76,6 @@ bool spi_init( void )
     szMismatchMessage[dwCharCntr] = '\0';
 
   Status = SPI_GetDllVersion(szDllVersion, 10);
-//  MessageBox(NULL, szDllVersion, "FTCSPI DLL Version", MB_OK);
 
   Status = SPI_GetNumHiSpeedDevices(&dwNumHiSpeedDevices);
 
@@ -149,6 +144,7 @@ bool spi_init( void )
 
           if ((Status = SPI_SetClock(ftHandle, MAX_FREQ_CLOCK_DIVISOR, &dwClockFrequencyHz)) == FTC_SUCCESS)
           {
+
             if ((Status = SPI_TurnOffDivideByFiveClockingHiSpeedDevice(ftHandle)) == FTC_SUCCESS)
               Status = SPI_SetClock(ftHandle, MAX_FREQ_CLOCK_DIVISOR, &dwClockFrequencyHz);
           }
@@ -286,12 +282,14 @@ bool spi_init( void )
 	HighPinsWriteActiveStates.bPin8ActiveState = false;
 	HighPinsWriteActiveStates.bPin8State = false;
 
+
+
 	return (Status == FTC_SUCCESS && dwNumHiSpeedDevices > 0 ) ? true : false;
 
 }
 
 BYTE byOutputBuffer[65535];
-BYTE dwLowPinsValue = 0;
+BYTE dwLowPinsValue = 0; 
 DWORD dwNumBytesToSend = 0; // Index to the output buffer
 DWORD dwNumBytesSent = 0; // Count of actual bytes sent - used with FT_Write
 DWORD dwNumBytesToRead = 0; // Number of bytes available to read
@@ -328,6 +326,7 @@ void SendBytesToDevice( void )
     // This function sends data to a FT2232C dual type device. The dwNumBytesToSend variable specifies the number of
     // bytes in the output buffer to be sent to a FT2232C dual type device. The dwNumBytesSent variable contains
     // the actual number of bytes sent to a FT2232C dual type device.
+
     Status = FT_Write((FT_HANDLE)ftHandle, byOutputBuffer, dwNumBytesToSend, &dwNumBytesSent);
   }
 

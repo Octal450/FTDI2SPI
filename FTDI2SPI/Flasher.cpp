@@ -7,6 +7,8 @@
 #include "XNAND.h"
 #include "sfc.h"
 #include "XSPI.h"
+#include <stdio.h>
+#include "XEMMC.h"
 
 unsigned int gNextBlock;
 unsigned char gWORDsLeft;
@@ -24,6 +26,26 @@ void FlashDataErase( unsigned int reg );
 void FlashDataRead( unsigned char Data[], unsigned int Arg, unsigned int Words );
 void FlashDataWrite( unsigned char Data[], unsigned int Arg, unsigned int Words );
 
+// In Flasher.cpp, or wherever you init flash type:
+extern bool g_is_emmc = false;
+
+void FlashDataInit(unsigned char FlashConfig[]) {
+	XSPIEnterFlashMode();
+	XSPIRead_sync(0, FlashConfig);
+	XSPIRead_sync(0, FlashConfig);
+
+	// Check the value at register 0x00
+	// Example: 0xC0462002 == eMMC, adjust to match your observed value
+	uint32_t val = *((uint32_t*)FlashConfig);
+	if (val == 0xC0462002) {
+		g_is_emmc = true;
+		printf("xFlasher eMMC over SPI mode detected!\n");
+	}
+	else {
+		g_is_emmc = false;
+		printf("NAND mode detected\n");
+	}
+}
 void PowerUp() 
 {
 	XSPILeaveFlashMode();
@@ -54,14 +76,6 @@ void FlashDataDeInit()
 void FlashDataErase( unsigned int reg )
 {
 	gGlobalStatus = XNANDErase( reg );	
-}
-
-void FlashDataInit( unsigned char FlashConfig[] )
-{
-	XSPIEnterFlashMode();
-	
-	XSPIRead_sync(0, FlashConfig);
-	XSPIRead_sync(0, FlashConfig);
 }
 
 void NandReadCB(unsigned char * pData, unsigned int len)

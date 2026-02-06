@@ -3,6 +3,8 @@
 #include <windows.h>
 
 #include "XSPI.h"
+#include "wrapper_spi.h"
+#include <stdio.h>
 
 extern void ClearOutputBuffer( void );
 extern void SetAnswerFast( void );

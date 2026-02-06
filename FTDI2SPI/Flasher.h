@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 #include "sfc.h"
-
+extern bool g_is_emmc;
 void FlashReadStatus(unsigned char Status[]);
 void FlashDataInit(unsigned char FlashConfig[]);
 void FlashDataDeInit(void);
